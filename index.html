@@ -5,11 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>final project</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px;
+            background-color: #333;
+            color: white;
         }
         h1 {
             text-align: center;
@@ -20,23 +28,74 @@
             display: flex;
             gap: 10px;
         }
+        .auth-buttons button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+        nav {
+            width: 250px;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        nav ul li {
+            margin-bottom: 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            transition: background-color 0.3s;
+        }
+        nav ul li a:hover {
+            background-color: #555;
+            border-radius: 5px;
+        }
+        nav ul li a span {
+            margin-right: 10px;
+        }
+        main {
+            flex: 1;
+            padding: 20px;
+            background-color: white;
+        }
+        main h2 {
+            font-size: 28px; /* 調整標題字體大小 */
+        }
+        main p {
+            font-size: 20px; /* 調整段落字體大小 */
+        }
     </style>
 </head>
 <body>
     <header>
-        <div></div> <!-- 左側占位 -->
+        <div></div>
         <h1>final project</h1>
         <div class="auth-buttons">
             <button>登入</button>
             <button>註冊</button>
         </div>
     </header>
-    <div>
+    <div class="container">
         <nav>
             <ul>
-                <li><a href="#">上傳</a></li>
-                <li><a href="#">下載</a></li>
-                <li><a href="#">介紹</a></li>
+                <li><a href="#"><span>📤</span> 上傳</a></li>
+                <li><a href="#"><span>📥</span> 下載</a></li>
+                <li><a href="#"><span>ℹ️</span> 介紹</a></li>
             </ul>
         </nav>
         <main>
