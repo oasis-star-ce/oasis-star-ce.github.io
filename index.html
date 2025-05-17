@@ -1,49 +1,63 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>final project</title>
+    <title>Final Project</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
         }
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 20px;
-            background-color: #333;
-            color: white;
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
         }
         h1 {
             text-align: center;
             flex-grow: 1;
             margin: 0;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
         }
         .auth-buttons {
             display: flex;
-            gap: 10px;
+            gap: 15px;
         }
         .auth-buttons button {
-            background-color: #4CAF50;
+            background: linear-gradient(45deg, #00d4ff, #007bff);
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        .auth-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
         }
         .container {
             display: flex;
-            height: calc(100vh - 60px);
+            height: calc(100vh - 70px);
         }
         nav {
             width: 250px;
-            background-color: #333;
-            color: white;
+            background: rgba(0, 0, 0, 0.7);
             padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
         }
         nav ul {
             list-style-type: none;
@@ -53,28 +67,35 @@
             margin-bottom: 15px;
         }
         nav ul li a {
-            color: white;
+            color: #e0e0e0;
             text-decoration: none;
-            font-size: 16px;
+            font-size: 18px;
             display: flex;
             align-items: center;
-            padding: 8px;
-            transition: background-color 0.3s;
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
         }
         nav ul li a:hover {
-            background-color: #555;
-            border-radius: 5px;
+            background: linear-gradient(45deg, #00d4ff, #007bff);
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
         }
         nav ul li a span {
             margin-right: 10px;
         }
         main {
             flex: 1;
-            padding: 20px;
-            background-color: white;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
         }
         main h2 {
-            font-size: 28px;
+            font-size: 32px;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
         }
         main p {
             font-size: 20px;
@@ -84,23 +105,23 @@
 <body>
     <header>
         <div></div>
-        <h1>final project</h1>
+        <h1>Final Project</h1>
         <div class="auth-buttons">
-            <button onclick="window.location.href='login.html'">登入</button>
-            <button onclick="window.location.href='register.html'">註冊</button>
+            <button onclick="window.location.href='login.html'">Login</button>
+            <button onclick="window.location.href='register.html'">Register</button>
         </div>
     </header>
     <div class="container">
         <nav>
             <ul>
-                <li><a href="#"><span>📤</span> 上傳</a></li>
-                <li><a href="#"><span>📥</span> 下載</a></li>
-                <li><a href="#"><span>ℹ️</span> 介紹</a></li>
+                <li><a href="#"><span>📤</span> Upload</a></li>
+                <li><a href="#"><span>📥</span> Download</a></li>
+                <li><a href="#"><span>ℹ️</span> About</a></li>
             </ul>
         </nav>
         <main>
-            <h2>歡迎來到我的網站</h2>
-            <p>請從左側選單選擇功能。</p>
+            <h2>Welcome to Final Project</h2>
+            <p>Please select a function from the menu on the left.</p>
         </main>
     </div>
 </body>
