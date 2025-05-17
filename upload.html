@@ -81,9 +81,6 @@
             color: white;
             box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
         }
-        nav ul li a span {
-            margin-right: 10px;
-        }
         main {
             flex: 1;
             padding: 30px;
@@ -91,9 +88,7 @@
             border-radius: 10px;
             margin: 20px;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: relative;
         }
         .drop-area {
             width: 80%;
@@ -106,6 +101,7 @@
             text-align: center;
             background: rgba(0, 0, 0, 0.5);
             transition: all 0.3s;
+            margin: 0 auto;
         }
         .drop-area.dragover {
             background: rgba(0, 212, 255, 0.2);
@@ -115,6 +111,45 @@
             font-size: 20px;
             color: #e0e0e0;
             text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+        }
+        .file-list {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #e0e0e0;
+        }
+        .upload-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #00d4ff, #007bff);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+        }
+        .home-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #00d4ff, #007bff);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
         }
     </style>
 </head>
@@ -130,21 +165,26 @@
     <div class="container">
         <nav>
             <ul>
-                <li><a href="upload.html"><span>📤</span> Upload</a></li>
-                <li><a href="#"><span>📥</span> Download</a></li>
-                <li><a href="#"><span>ℹ️</span> About</a></li>
+                <li><a href="upload.html">Upload</a></li>
+                <li><a href="#">Download</a></li>
+                <li><a href="#">About</a></li>
             </ul>
         </nav>
         <main>
+            <button class="home-button" onclick="window.location.href='index.html'">Home</button>
             <div class="drop-area" id="dropArea">
                 <p>Drag and drop your files here to upload</p>
             </div>
+            <div class="file-list" id="fileList"></div>
+            <button class="upload-button" id="uploadButton" style="display: none;">Upload</button>
         </main>
     </div>
     <script>
         const dropArea = document.getElementById('dropArea');
+        const fileList = document.getElementById('fileList');
+        const uploadButton = document.getElementById('uploadButton');
+        let filesToUpload = [];
 
-        // 處理拖曳事件
         dropArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropArea.classList.add('dragover');
@@ -158,20 +198,38 @@
             e.preventDefault();
             dropArea.classList.remove('dragover');
             const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
 
-            if (files.length > 0) {
+        function handleFiles(files) {
+            filesToUpload = Array.from(files);
+            fileList.innerHTML = '';
+            filesToUpload.forEach(file => {
+                const p = document.createElement('p');
+                p.textContent = file.name;
+                fileList.appendChild(p);
+            });
+            if (filesToUpload.length > 0) {
+                uploadButton.style.display = 'block';
+            }
+        }
+
+        uploadButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to upload these files?')) {
                 const formData = new FormData();
-                for (let i = 0; i < files.length; i++) {
-                    formData.append('files', files[i]);
-                }
+                filesToUpload.forEach(file => {
+                    formData.append('files', file);
+                });
 
-                // 模擬提交到後端（預留接口）
                 fetch('/api/upload', {
                     method: 'POST',
                     body: formData,
                 })
                 .then(response => {
                     alert('Files uploaded successfully!');
+                    fileList.innerHTML = '';
+                    uploadButton.style.display = 'none';
+                    filesToUpload = [];
                 })
                 .catch(error => {
                     console.error('Error:', error);
