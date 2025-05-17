@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Final Project</title>
+    <title>Oasis Star</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -11,7 +11,6 @@
             padding: 0;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             color: #e0e0e0;
-            transition: all 0.3s;
         }
         header {
             display: flex;
@@ -61,13 +60,9 @@
             background: rgba(0, 0, 0, 0.7);
             padding: 20px;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
-            transition: transform 0.3s;
             position: fixed;
             height: calc(100vh - 70px);
             overflow-y: auto;
-        }
-        nav.collapsed {
-            transform: translateX(-250px);
         }
         nav ul {
             list-style-type: none;
@@ -98,30 +93,6 @@
             border-radius: 10px;
             margin-left: 270px;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
-            transition: margin-left 0.3s;
-        }
-        main.collapsed {
-            margin-left: 20px;
-        }
-        .toggle-btn {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(45deg, #00d4ff, #007bff);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-            z-index: 20;
-        }
-        .toggle-btn:hover {
-            transform: translateY(-50%) scale(1.1);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
         }
         main h2 {
             font-size: 32px;
@@ -136,6 +107,77 @@
         }
         .content-section.active {
             display: block;
+        }
+        .form-container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px 50px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            width: 350px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #00d4ff;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            border-color: #007bff;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #00d4ff, #007bff);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .login-link, .register-link {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .login-link a, .register-link a {
+            color: #00d4ff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .login-link a:hover, .register-link a:hover {
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
         }
         .drop-area {
             width: 80%;
@@ -184,15 +226,14 @@
 </head>
 <body>
     <header>
-        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-        <h1>Final Project</h1>
+        <h1>Oasis Star</h1>
         <div class="auth-buttons">
-            <button onclick="window.location.href='login.html'">Login</button>
-            <button onclick="window.location.href='register.html'">Register</button>
+            <button onclick="showSection('login')">Login</button>
+            <button onclick="showSection('register')">Register</button>
         </div>
     </header>
     <div class="container">
-        <nav id="sidebar">
+        <nav>
             <ul>
                 <li><a onclick="showSection('home')">Home</a></li>
                 <li><a onclick="showSection('encrypt')">Encrypt</a></li>
@@ -202,7 +243,7 @@
         </nav>
         <main id="mainContent">
             <div id="home" class="content-section active">
-                <h2>Welcome to Final Project</h2>
+                <h2>Welcome to Oasis Star</h2>
                 <p>Please select a function from the sidebar on the left.</p>
             </div>
             <div id="encrypt" class="content-section">
@@ -221,16 +262,60 @@
                 <h2>About Us</h2>
                 <p>This is a placeholder for the about page. More details will be added soon.</p>
             </div>
+            <div id="login" class="content-section">
+                <div class="form-container">
+                    <h2>Login</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="login-username">Username:</label>
+                            <input type="text" id="login-username" name="login-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password:</label>
+                            <input type="password" id="login-password" name="login-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-otp">Two-Factor Code:</label>
+                            <input type="text" id="login-otp" name="login-otp" required>
+                        </div>
+                        <button type="submit">Login</button>
+                    </form>
+                    <div class="register-link">
+                        Don't have an account? <a onclick="showSection('register')">Register</a>
+                    </div>
+                </div>
+            </div>
+            <div id="register" class="content-section">
+                <div class="form-container">
+                    <h2>Register</h2>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="register-email">Email:</label>
+                            <input type="email" id="register-email" name="register-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-username">Username:</label>
+                            <input type="text" id="register-username" name="register-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Password:</label>
+                            <input type="password" id="register-password" name="register-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-confirm-password">Confirm Password:</label>
+                            <input type="password" id="register-confirm-password" name="register-confirm-password" required>
+                            <div id="register-password-error" class="error"></div>
+                        </div>
+                        <button type="submit" id="register-submit" disabled>Submit</button>
+                        <div class="login-link">
+                            Already have an account? <a onclick="showSection('login')">Login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
     </div>
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('collapsed');
-        }
-
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.content-section');
             sections.forEach(section => {
@@ -296,6 +381,85 @@
                     alert('Encryption failed. Please try again.');
                 });
             }
+        });
+
+        // Login Form Logic
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const otp = document.getElementById('login-otp').value;
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password, otp }),
+            })
+            .then(response => {
+                showSection('home');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showSection('home');
+            });
+        });
+
+        // Register Form Logic
+        const registerForm = document.getElementById('registerForm');
+        const registerSubmit = document.getElementById('register-submit');
+        const registerPasswordError = document.getElementById('register-password-error');
+        const registerInputs = registerForm.querySelectorAll('input');
+
+        registerInputs.forEach(input => {
+            input.addEventListener('input', validateRegisterForm);
+        });
+
+        function validateRegisterForm() {
+            const email = document.getElementById('register-email').value;
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+
+            let errorMessage = '';
+
+            if (!email || !username || !password || !confirmPassword) {
+                errorMessage = '所有欄位都必須填寫！';
+            } else if (password !== confirmPassword) {
+                errorMessage = '密碼與確認密碼不一致！';
+            }
+
+            if (errorMessage) {
+                registerPasswordError.textContent = errorMessage;
+                registerPasswordError.style.display = 'block';
+                registerSubmit.disabled = true;
+            } else {
+                registerPasswordError.style.display = 'none';
+                registerSubmit.disabled = false;
+            }
+        }
+
+        registerForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('register-email').value;
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, username, password }),
+            })
+            .then(response => {
+                showSection('home');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showSection('home');
+            });
         });
     </script>
 </body>
