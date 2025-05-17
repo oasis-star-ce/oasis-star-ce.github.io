@@ -72,10 +72,13 @@
             transform: translateY(-2px);
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
         }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
         .error {
             color: red;
             font-size: 14px;
-            display: none;
             margin-top: 5px;
         }
     </style>
@@ -99,51 +102,64 @@
             <div class="form-group">
                 <label for="confirm-password">Confirm Password:</label>
                 <input type="password" id="confirm-password" name="confirm-password" required>
-                <div id="password-error" class="error '
-
-System: ></div>
+                <div id="password-error" class="error"></div>
             </div>
-            <button type="submit">Submit</button>
+            <button type="submit" id="submitButton" disabled>Submit</button>
         </form>
     </div>
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // 阻止表單默認提交
+        const form = document.getElementById('registerForm');
+        const submitButton = document.getElementById('submitButton');
+        const passwordError = document.getElementById('password-error');
+        const inputs = form.querySelectorAll('input');
+
+        inputs.forEach(input => {
+            input.addEventListener('input', validateForm);
+        });
+
+        function validateForm() {
             const email = document.getElementById('email').value;
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
-            const errorElement = document.getElementById('password-error');
 
-            // 檢查密碼是否一致
-            if (password !== confirmPassword) {
-                errorElement.textContent = 'Passwords do not match!';
-                errorElement.style.display = 'block';
-                return;
+            let errorMessage = '';
+
+            if (!email || !username || !password || !confirmPassword) {
+                errorMessage = '所有欄位都必須填寫！';
+            } else if (password !== confirmPassword) {
+                errorMessage = '密碼與確認密碼不一致！';
             }
-            errorElement.style.display = 'none';
 
-            // 模擬提交到後端（預留接口）
-            const data = {
-                email: email,
-                username: username,
-                password: password
-            };
+            if (errorMessage) {
+                passwordError.textContent = errorMessage;
+                passwordError.style.display = 'block';
+                submitButton.disabled = true;
+            } else {
+                passwordError.style.display = 'none';
+                submitButton.disabled = false;
+            }
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
             fetch('/api/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ email, username, password }),
             })
             .then(response => {
-                // 無論成功與否，跳回主頁
                 window.location.href = 'index.html';
             })
             .catch(error => {
                 console.error('Error:', error);
-                window.location.href = 'index.html'; // 錯誤也跳回主頁
+                window.location.href = 'index.html';
             });
         });
     </script>
