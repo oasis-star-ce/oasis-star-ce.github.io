@@ -84,6 +84,7 @@
             padding: 10px;
             border-radius: 5px;
             transition: all 0.3s;
+            cursor: pointer;
         }
         nav ul li a:hover {
             background: linear-gradient(45deg, #00d4ff, #007bff);
@@ -130,6 +131,55 @@
         main p {
             font-size: 20px;
         }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .drop-area {
+            width: 80%;
+            height: 300px;
+            border: 2px dashed #00d4ff;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+            margin: 0 auto;
+        }
+        .drop-area.dragover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+        .drop-area p {
+            font-size: 20px;
+            color: #e0e0e0;
+            text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+        }
+        .file-list {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #e0e0e0;
+        }
+        .upload-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #00d4ff, #007bff);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+        }
     </style>
 </head>
 <body>
@@ -144,15 +194,33 @@
     <div class="container">
         <nav id="sidebar">
             <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="upload.html">Upload</a></li>
-                <li><a href="download.html">Download</a></li>
-                <li><a href="about.html">About</a></li>
+                <li><a onclick="showSection('home')">Home</a></li>
+                <li><a onclick="showSection('encrypt')">Encrypt</a></li>
+                <li><a onclick="showSection('download')">Download</a></li>
+                <li><a onclick="showSection('about')">About</a></li>
             </ul>
         </nav>
         <main id="mainContent">
-            <h2>Welcome to Final Project</h2>
-            <p>Please select a function from the sidebar on the left.</p>
+            <div id="home" class="content-section active">
+                <h2>Welcome to Final Project</h2>
+                <p>Please select a function from the sidebar on the left.</p>
+            </div>
+            <div id="encrypt" class="content-section">
+                <h2>Encrypt Files</h2>
+                <div class="drop-area" id="dropArea">
+                    <p>Drag and drop your files here to encrypt</p>
+                </div>
+                <div class="file-list" id="fileList"></div>
+                <button class="upload-button" id="uploadButton" style="display: none;">Encrypt</button>
+            </div>
+            <div id="download" class="content-section">
+                <h2>Download Section</h2>
+                <p>This is a placeholder for the download functionality. More features will be added soon.</p>
+            </div>
+            <div id="about" class="content-section">
+                <h2>About Us</h2>
+                <p>This is a placeholder for the about page. More details will be added soon.</p>
+            </div>
         </main>
     </div>
     <script>
@@ -162,6 +230,73 @@
             sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('collapsed');
         }
+
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // Encrypt Section Logic
+        const dropArea = document.getElementById('dropArea');
+        const fileList = document.getElementById('fileList');
+        const uploadButton = document.getElementById('uploadButton');
+        let filesToUpload = [];
+
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            filesToUpload = Array.from(files);
+            fileList.innerHTML = '';
+            filesToUpload.forEach(file => {
+                const p = document.createElement('p');
+                p.textContent = file.name;
+                fileList.appendChild(p);
+            });
+            if (filesToUpload.length > 0) {
+                uploadButton.style.display = 'block';
+            }
+        }
+
+        uploadButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to encrypt these files?')) {
+                const formData = new FormData();
+                filesToUpload.forEach(file => {
+                    formData.append('files', file);
+                });
+
+                fetch('/api/encrypt', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => {
+                    alert('Files encrypted successfully!');
+                    fileList.innerHTML = '';
+                    uploadButton.style.display = 'none';
+                    filesToUpload = [];
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Encryption failed. Please try again.');
+                });
+            }
+        });
     </script>
 </body>
 </html>
