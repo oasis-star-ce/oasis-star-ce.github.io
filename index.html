@@ -93,6 +93,9 @@
             border-radius: 10px;
             margin-left: 270px;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         main h2 {
             font-size: 32px;
@@ -104,6 +107,7 @@
         }
         .content-section {
             display: none;
+            width: 100%;
         }
         .content-section.active {
             display: block;
@@ -237,7 +241,7 @@
             <ul>
                 <li><a onclick="showSection('home')">Home</a></li>
                 <li><a onclick="showSection('encrypt')">Encrypt</a></li>
-                <li><a onclick="showSection('download')">Download</a></li>
+                <li><a onclick="showSection('decrypt')">Decrypt</a></li>
                 <li><a onclick="showSection('about')">About</a></li>
             </ul>
         </nav>
@@ -254,9 +258,13 @@
                 <div class="file-list" id="fileList"></div>
                 <button class="upload-button" id="uploadButton" style="display: none;">Encrypt</button>
             </div>
-            <div id="download" class="content-section">
-                <h2>Download Section</h2>
-                <p>This is a placeholder for the download functionality. More features will be added soon.</p>
+            <div id="decrypt" class="content-section">
+                <h2>Decrypt Files</h2>
+                <div class="drop-area" id="decryptDropArea">
+                    <p>Drag and drop your encrypted files and certificate here to decrypt</p>
+                </div>
+                <div class="file-list" id="decryptFileList"></div>
+                <button class="upload-button" id="decryptButton" style="display: none;">Decrypt</button>
             </div>
             <div id="about" class="content-section">
                 <h2>About Us</h2>
@@ -343,20 +351,21 @@
             e.preventDefault();
             dropArea.classList.remove('dragover');
             const files = e.dataTransfer.files;
-            handleFiles(files);
+            handleFiles(files, fileList, uploadButton);
         });
 
-        function handleFiles(files) {
-            filesToUpload = Array.from(files);
-            fileList.innerHTML = '';
-            filesToUpload.forEach(file => {
+        function handleFiles(files, fileListElement, buttonElement) {
+            const filesArray = Array.from(files);
+            fileListElement.innerHTML = '';
+            filesArray.forEach(file => {
                 const p = document.createElement('p');
                 p.textContent = file.name;
-                fileList.appendChild(p);
+                fileListElement.appendChild(p);
             });
-            if (filesToUpload.length > 0) {
-                uploadButton.style.display = 'block';
+            if (filesArray.length > 0) {
+                buttonElement.style.display = 'block';
             }
+            return filesArray;
         }
 
         uploadButton.addEventListener('click', () => {
@@ -379,6 +388,52 @@
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Encryption failed. Please try again.');
+                });
+            }
+        });
+
+        // Decrypt Section Logic
+        const decryptDropArea = document.getElementById('decryptDropArea');
+        const decryptFileList = document.getElementById('decryptFileList');
+        const decryptButton = document.getElementById('decryptButton');
+        let decryptFilesToUpload = [];
+
+        decryptDropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            decryptDropArea.classList.add('dragover');
+        });
+
+        decryptDropArea.addEventListener('dragleave', () => {
+            decryptDropArea.classList.remove('dragover');
+        });
+
+        decryptDropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            decryptDropArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            decryptFilesToUpload = handleFiles(files, decryptFileList, decryptButton);
+        });
+
+        decryptButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to decrypt these files?')) {
+                const formData = new FormData();
+                decryptFilesToUpload.forEach(file => {
+                    formData.append('files', file);
+                });
+
+                fetch('/api/decrypt', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => {
+                    alert('Files decrypted successfully!');
+                    decryptFileList.innerHTML = '';
+                    decryptButton.style.display = 'none';
+                    decryptFilesToUpload = [];
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Decryption failed. Please try again.');
                 });
             }
         });
@@ -425,9 +480,9 @@
             let errorMessage = '';
 
             if (!email || !username || !password || !confirmPassword) {
-                errorMessage = '所有欄位都必須填寫！';
+                errorMessage = 'All fields are required!';
             } else if (password !== confirmPassword) {
-                errorMessage = '密碼與確認密碼不一致！';
+                errorMessage = 'Password and confirm password do not match!';
             }
 
             if (errorMessage) {
