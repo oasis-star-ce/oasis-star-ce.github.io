@@ -11,6 +11,7 @@
             padding: 0;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             color: #e0e0e0;
+            transition: all 0.3s;
         }
         header {
             display: flex;
@@ -19,6 +20,8 @@
             padding: 15px 30px;
             background: rgba(0, 0, 0, 0.5);
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            position: relative;
+            z-index: 10;
         }
         h1 {
             text-align: center;
@@ -58,6 +61,13 @@
             background: rgba(0, 0, 0, 0.7);
             padding: 20px;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            transition: transform 0.3s;
+            position: fixed;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+        nav.collapsed {
+            transform: translateX(-250px);
         }
         nav ul {
             list-style-type: none;
@@ -70,8 +80,7 @@
             color: #e0e0e0;
             text-decoration: none;
             font-size: 18px;
-            display: flex;
-            align-items: center;
+            display: block;
             padding: 10px;
             border-radius: 5px;
             transition: all 0.3s;
@@ -81,16 +90,37 @@
             color: white;
             box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
         }
-        nav ul li a span {
-            margin-right: 10px;
-        }
         main {
             flex: 1;
             padding: 30px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
-            margin: 20px;
+            margin-left: 270px;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            transition: margin-left 0.3s;
+        }
+        main.collapsed {
+            margin-left: 20px;
+        }
+        .toggle-btn {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, #00d4ff, #007bff);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            z-index: 20;
+        }
+        .toggle-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
         }
         main h2 {
             font-size: 32px;
@@ -104,7 +134,7 @@
 </head>
 <body>
     <header>
-        <div></div>
+        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
         <h1>Final Project</h1>
         <div class="auth-buttons">
             <button onclick="window.location.href='login.html'">Login</button>
@@ -112,17 +142,26 @@
         </div>
     </header>
     <div class="container">
-        <nav>
+        <nav id="sidebar">
             <ul>
-                <li><a href="upload.html"><span>📤</span> Upload</a></li>
-                <li><a href="#"><span>📥</span> Download</a></li>
-                <li><a href="#"><span>ℹ️</span> About</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="upload.html">Upload</a></li>
+                <li><a href="download.html">Download</a></li>
+                <li><a href="about.html">About</a></li>
             </ul>
         </nav>
-        <main>
+        <main id="mainContent">
             <h2>Welcome to Final Project</h2>
-            <p>Please select a function from the menu on the left.</p>
+            <p>Please select a function from the sidebar on the left.</p>
         </main>
     </div>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('collapsed');
+        }
+    </script>
 </body>
 </html>
