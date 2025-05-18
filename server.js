@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   email: String,
   username: String,
   password: String,
-  secret: String, // 2FA 密鑰
+  secret: String,
 });
 const User = mongoose.model('User', userSchema);
 
@@ -73,6 +73,11 @@ app.post('/api/login', async (req, res) => {
   }
 
   res.status(200).json({ message: 'Login successful' });
+});
+
+// 添加 ping 端點以接收定時請求
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({ message: 'Ping received' });
 });
 
 app.get('/api/hello', (req, res) => {
