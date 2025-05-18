@@ -51,6 +51,12 @@
             transform: translateY(-2px);
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
         }
+        .welcome-message {
+            font-size: 16px;
+            color: #00d4ff;
+            text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+            margin-right: 15px;
+        }
         .container {
             display: flex;
             height: calc(100vh - 70px);
@@ -248,14 +254,27 @@
             border: 1px solid #00d4ff;
             border-radius: 5px;
         }
+        .login-prompt {
+            font-size: 20px;
+            color: #ff5555;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Oasis Star</h1>
-        <div class="auth-buttons">
+        <div class="auth-buttons" id="authButtons">
             <button onclick="showSection('login')">Login</button>
             <button onclick="showSection('register')">Register</button>
+        </div>
+        <div class="auth-buttons" id="userInfo" style="display: none;">
+            <span class="welcome-message" id="welcomeMessage"></span>
+            <button onclick="logout()">Logout</button>
         </div>
     </header>
     <div class="container">
@@ -279,21 +298,31 @@
                 <div class="text-left-top">
                     <h2>Encrypt Files</h2>
                 </div>
-                <div class="drop-area" id="dropArea">
-                    <p>Drag and drop your files here to encrypt</p>
+                <div id="encryptContent">
+                    <div class="drop-area" id="dropArea">
+                        <p>Drag and drop your files here to encrypt</p>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                    <button class="upload-button" id="uploadButton" style="display: none;">Encrypt</button>
                 </div>
-                <div class="file-list" id="fileList"></div>
-                <button class="upload-button" id="uploadButton" style="display: none;">Encrypt</button>
+                <div class="login-prompt" id="encryptLoginPrompt" style="display: none;">
+                    請先登入！
+                </div>
             </div>
             <div id="decrypt" class="content-section">
                 <div class="text-left-top">
                     <h2>Decrypt Files</h2>
                 </div>
-                <div class="drop-area" id="decryptDropArea">
-                    <p>Drag and drop your encrypted files and certificate here to decrypt</p>
+                <div id="decryptContent">
+                    <div class="drop-area" id="decryptDropArea">
+                        <p>Drag and drop your encrypted files and certificate here to decrypt</p>
+                    </div>
+                    <div class="file-list" id="decryptFileList"></div>
+                    <button class="upload-button" id="decryptButton" style="display: none;">Decrypt</button>
                 </div>
-                <div class="file-list" id="decryptFileList"></div>
-                <button class="upload-button" id="decryptButton" style="display: none;">Decrypt</button>
+                <div class="login-prompt" id="decryptLoginPrompt" style="display: none;">
+                    請先登入！
+                </div>
             </div>
             <div id="about" class="content-section">
                 <div class="text-left-top">
@@ -365,8 +394,55 @@
         </main>
     </div>
     <script>
-        const backendUrl = 'https://oasis-star-ce.onrender.com'; // 請替換為你的後端 URL
+        const backendUrl = 'https://oasis-star-ce.onrender.com';
 
+        // 檢查登入狀態
+        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        let currentUser = localStorage.getItem('username') || '';
+
+        // 初始化頁面
+        function initializePage() {
+            updateHeader();
+            updateSections();
+        }
+
+        // 更新右上角顯示
+        function updateHeader() {
+            const authButtons = document.getElementById('authButtons');
+            const userInfo = document.getElementById('userInfo');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+
+            if (isLoggedIn) {
+                authButtons.style.display = 'none';
+                userInfo.style.display = 'flex';
+                welcomeMessage.textContent = `Welcome, ${currentUser}`;
+            } else {
+                authButtons.style.display = 'flex';
+                userInfo.style.display = 'none';
+            }
+        }
+
+        // 控制 Encrypt 和 Decrypt 區塊的顯示
+        function updateSections() {
+            const encryptContent = document.getElementById('encryptContent');
+            const encryptLoginPrompt = document.getElementById('encryptLoginPrompt');
+            const decryptContent = document.getElementById('decryptContent');
+            const decryptLoginPrompt = document.getElementById('decryptLoginPrompt');
+
+            if (isLoggedIn) {
+                encryptContent.style.display = 'block';
+                encryptLoginPrompt.style.display = 'none';
+                decryptContent.style.display = 'block';
+                decryptLoginPrompt.style.display = 'none';
+            } else {
+                encryptContent.style.display = 'none';
+                encryptLoginPrompt.style.display = 'block';
+                decryptContent.style.display = 'none';
+                decryptLoginPrompt.style.display = 'block';
+            }
+        }
+
+        // 切換頁面
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.content-section');
             sections.forEach(section => {
@@ -377,6 +453,20 @@
                 section.classList.add('active');
             } else {
                 console.error(`Section with ID '${sectionId}' not found.`);
+            }
+        }
+
+        // 登出功能
+        function logout() {
+            if (confirm('確定要登出嗎？')) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                isLoggedIn = false;
+                currentUser = '';
+                updateHeader();
+                updateSections();
+                showSection('login');
+                alert('已成功登出！');
             }
         }
 
@@ -421,6 +511,12 @@
         }
 
         uploadButton.addEventListener('click', () => {
+            if (!isLoggedIn) {
+                alert('請先登入！');
+                showSection('login');
+                return;
+            }
+
             if (confirm('Are you sure you want to encrypt these files?')) {
                 const formData = new FormData();
                 filesToUpload.forEach(file => {
@@ -468,6 +564,12 @@
         });
 
         decryptButton.addEventListener('click', () => {
+            if (!isLoggedIn) {
+                alert('請先登入！');
+                showSection('login');
+                return;
+            }
+
             if (confirm('Are you sure you want to decrypt these files?')) {
                 const formData = new FormData();
                 decryptFilesToUpload.forEach(file => {
@@ -515,8 +617,16 @@
                     throw new Error(data.message || 'Login failed');
                 }
 
+                // 登入成功，儲存狀態
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('username', username);
+                isLoggedIn = true;
+                currentUser = username;
+
                 alert('Login successful!');
                 loginError.textContent = '';
+                updateHeader();
+                updateSections();
                 showSection('home');
             } catch (error) {
                 loginError.textContent = error.message;
@@ -592,6 +702,9 @@
                 console.error('Error:', error);
             }
         });
+
+        // 初始化頁面
+        initializePage();
     </script>
 </body>
 </html>
