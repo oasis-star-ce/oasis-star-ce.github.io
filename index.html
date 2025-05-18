@@ -313,6 +313,7 @@
                             <input type="text" id="login-otp" name="login-otp" required>
                         </div>
                         <button type="submit">Login</button>
+                        <div id="login-error" class="error"></div>
                     </form>
                     <div class="register-link">
                         Don't have an account? <a onclick="showSection('register')">Register</a>
@@ -341,6 +342,7 @@
                             <div id="register-password-error" class="error"></div>
                         </div>
                         <button type="submit" id="register-submit" disabled>Submit</button>
+                        <div id="register-error" class="error"></div>
                         <div class="login-link">
                             Already have an account? <a onclick="showSection('login')">Login</a>
                         </div>
@@ -350,6 +352,8 @@
         </main>
     </div>
     <script>
+        const backendUrl = 'https://oasis-star-ce.onrender.com'; // 替換為你的 Render 後端 URL
+
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.content-section');
             sections.forEach(section => {
@@ -405,7 +409,7 @@
                     formData.append('files', file);
                 });
 
-                fetch('/api/encrypt', {
+                fetch(`${backendUrl}/api/encrypt`, {
                     method: 'POST',
                     body: formData,
                 })
@@ -451,7 +455,7 @@
                     formData.append('files', file);
                 });
 
-                fetch('/api/decrypt', {
+                fetch(`${backendUrl}/api/decrypt`, {
                     method: 'POST',
                     body: formData,
                 })
@@ -469,32 +473,42 @@
         });
 
         // Login Form Logic
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
             const otp = document.getElementById('login-otp').value;
+            const loginError = document.getElementById('login-error');
 
-            fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password, otp }),
-            })
-            .then(response => {
+            try {
+                const response = await fetch(`${backendUrl}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password, otp }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Login failed');
+                }
+
+                alert('Login successful!');
+                loginError.textContent = '';
                 showSection('home');
-            })
-            .catch(error => {
+            } catch (error) {
+                loginError.textContent = error.message;
                 console.error('Error:', error);
-                showSection('home');
-            });
+            }
         });
 
         // Register Form Logic
         const registerForm = document.getElementById('registerForm');
         const registerSubmit = document.getElementById('register-submit');
         const registerPasswordError = document.getElementById('register-password-error');
+        const registerError = document.getElementById('register-error');
         const registerInputs = registerForm.querySelectorAll('input');
 
         registerInputs.forEach(input => {
@@ -525,26 +539,34 @@
             }
         }
 
-        registerForm.addEventListener('submit', function(event) {
+        registerForm.addEventListener('submit', async function(event) {
             event.preventDefault();
             const email = document.getElementById('register-email').value;
             const username = document.getElementById('register-username').value;
             const password = document.getElementById('register-password').value;
 
-            fetch('/api/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, username, password }),
-            })
-            .then(response => {
-                showSection('home');
-            })
-            .catch(error => {
+            try {
+                const response = await fetch(`${backendUrl}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, username, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Registration failed');
+                }
+
+                alert('Registration successful! Please login.');
+                registerError.textContent = '';
+                showSection('login');
+            } catch (error) {
+                registerError.textContent = error.message;
                 console.error('Error:', error);
-                showSection('home');
-            });
+            }
         });
     </script>
 </body>
