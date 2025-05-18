@@ -239,6 +239,15 @@
             padding: 10px;
             text-align: left;
         }
+        .qr-code {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .qr-code img {
+            max-width: 200px;
+            border: 1px solid #00d4ff;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -313,6 +322,7 @@
                             <input type="text" id="login-otp" name="login-otp" required>
                         </div>
                         <button type="submit">Login</button>
+                        <div id="login-error" class="error"></div>
                     </form>
                     <div class="register-link">
                         Don't have an account? <a onclick="showSection('register')">Register</a>
@@ -341,6 +351,11 @@
                             <div id="register-password-error" class="error"></div>
                         </div>
                         <button type="submit" id="register-submit" disabled>Submit</button>
+                        <div id="register-error" class="error"></div>
+                        <div id="qr-code" class="qr-code" style="display: none;">
+                            <p>Scan this QR Code with Google Authenticator:</p>
+                            <img id="qr-code-img" src="" alt="QR Code">
+                        </div>
                         <div class="login-link">
                             Already have an account? <a onclick="showSection('login')">Login</a>
                         </div>
@@ -350,12 +365,19 @@
         </main>
     </div>
     <script>
+        const backendUrl = 'https://oasis-star-ce.onrender.com'; // 請替換為你的後端 URL
+
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.content-section');
             sections.forEach(section => {
                 section.classList.remove('active');
             });
-            document.getElementById(sectionId).classList.add('active');
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.add('active');
+            } else {
+                console.error(`Section with ID '${sectionId}' not found.`);
+            }
         }
 
         // Encrypt Section Logic
@@ -405,11 +427,12 @@
                     formData.append('files', file);
                 });
 
-                fetch('/api/encrypt', {
+                fetch(`${backendUrl}/api/encrypt`, {
                     method: 'POST',
                     body: formData,
                 })
                 .then(response => {
+                    if (!response.ok) throw new Error('Encryption failed');
                     alert('Files encrypted successfully!');
                     fileList.innerHTML = '';
                     uploadButton.style.display = 'none';
@@ -451,11 +474,12 @@
                     formData.append('files', file);
                 });
 
-                fetch('/api/decrypt', {
+                fetch(`${backendUrl}/api/decrypt`, {
                     method: 'POST',
                     body: formData,
                 })
                 .then(response => {
+                    if (!response.ok) throw new Error('Decryption failed');
                     alert('Files decrypted successfully!');
                     decryptFileList.innerHTML = '';
                     decryptButton.style.display = 'none';
@@ -469,32 +493,44 @@
         });
 
         // Login Form Logic
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
             const otp = document.getElementById('login-otp').value;
+            const loginError = document.getElementById('login-error');
 
-            fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password, otp }),
-            })
-            .then(response => {
+            try {
+                const response = await fetch(`${backendUrl}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password, otp }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Login failed');
+                }
+
+                alert('Login successful!');
+                loginError.textContent = '';
                 showSection('home');
-            })
-            .catch(error => {
+            } catch (error) {
+                loginError.textContent = error.message;
                 console.error('Error:', error);
-                showSection('home');
-            });
+            }
         });
 
         // Register Form Logic
         const registerForm = document.getElementById('registerForm');
         const registerSubmit = document.getElementById('register-submit');
         const registerPasswordError = document.getElementById('register-password-error');
+        const registerError = document.getElementById('register-error');
+        const qrCodeDiv = document.getElementById('qr-code');
+        const qrCodeImg = document.getElementById('qr-code-img');
         const registerInputs = registerForm.querySelectorAll('input');
 
         registerInputs.forEach(input => {
@@ -525,26 +561,36 @@
             }
         }
 
-        registerForm.addEventListener('submit', function(event) {
+        registerForm.addEventListener('submit', async function(event) {
             event.preventDefault();
             const email = document.getElementById('register-email').value;
             const username = document.getElementById('register-username').value;
             const password = document.getElementById('register-password').value;
 
-            fetch('/api/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, username, password }),
-            })
-            .then(response => {
-                showSection('home');
-            })
-            .catch(error => {
+            try {
+                const response = await fetch(`${backendUrl}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, username, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Registration failed');
+                }
+
+                qrCodeImg.src = data.qrCodeUrl;
+                qrCodeDiv.style.display = 'block';
+                alert('Registration successful! Please scan the QR code with Google Authenticator, then login.');
+                registerError.textContent = '';
+            } catch (error) {
+                registerError.textContent = error.message;
+                qrCodeDiv.style.display = 'none';
                 console.error('Error:', error);
-                showSection('home');
-            });
+            }
         });
     </script>
 </body>
