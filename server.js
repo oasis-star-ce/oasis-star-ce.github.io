@@ -3,8 +3,8 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static files from the 'public' directory (where index.html is)
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files from the root directory
+app.use(express.static(__dirname));
 
 // Sample API endpoint
 app.get('/api/hello', (req, res) => {
