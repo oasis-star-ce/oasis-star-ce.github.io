@@ -1,12 +1,14 @@
 {
-       "name": "your-backend",
-       "version": "1.0.0",
-       "description": "Backend for your web app",
-       "main": "server.js",
-       "scripts": {
-         "start": "node server.js"
-       },
-       "dependencies": {
-         "express": "^4.18.2"
-       }
-     }
+  "name": "oasis-star-ce.github.io",
+  "version": "1.0.0",
+  "description": "Static site with Node.js backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'No build step needed for static site'"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "homepage": "https://oasis-star-ce.github.io"
+}
