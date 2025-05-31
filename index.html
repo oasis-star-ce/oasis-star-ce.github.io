@@ -140,7 +140,7 @@
             margin-bottom: 5px;
             color: #e0e0e0;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             font-size: 16px;
@@ -151,10 +151,14 @@
             box-sizing: border-box;
             transition: all 0.3s;
         }
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
             border-color: #007bff;
+        }
+        select option {
+            background: #16213e;
+            color: #e0e0e0;
         }
         button {
             width: 100%;
@@ -195,7 +199,7 @@
         }
         .drop-area {
             width: 80%;
-            height: 300px;
+            height: 250px;
             border: 2px dashed #00d4ff;
             border-radius: 10px;
             display: flex;
@@ -206,7 +210,7 @@
             transition: all 0.3s;
             margin: 0 auto;
             position: relative;
-            top: 100px;
+            top: 80px;
         }
         .drop-area.dragover {
             background: rgba(0, 212, 255, 0.2);
@@ -263,6 +267,38 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+        .algorithm-selector {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+            border: 1px solid #00d4ff;
+        }
+        .algorithm-selector label {
+            font-size: 16px;
+            color: #00d4ff;
+            margin-bottom: 8px;
+            display: block;
+            text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+        }
+        .algorithm-selector select {
+            width: 120px;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #00d4ff;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            transition: all 0.3s;
+        }
+        .algorithm-selector select:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            border-color: #007bff;
+        }
     </style>
 </head>
 <body>
@@ -299,6 +335,13 @@
                     <h2>Encrypt Files</h2>
                 </div>
                 <div id="encryptContent">
+                    <div class="algorithm-selector">
+                        <label for="algorithmSelect">Encryption Algorithm:</label>
+                        <select id="algorithmSelect">
+                            <option value="AES">AES</option>
+                            <option value="ChaCha">ChaCha20</option>
+                        </select>
+                    </div>
                     <div class="drop-area" id="dropArea">
                         <p>Drag and drop your files here to encrypt</p>
                     </div>
@@ -474,6 +517,7 @@
         const dropArea = document.getElementById('dropArea');
         const fileList = document.getElementById('fileList');
         const uploadButton = document.getElementById('uploadButton');
+        const algorithmSelect = document.getElementById('algorithmSelect');
         let filesToUpload = [];
 
         dropArea.addEventListener('dragover', (e) => {
@@ -518,10 +562,17 @@
             }
 
             if (confirm('Are you sure you want to encrypt these files?')) {
+                const selectedAlgorithm = algorithmSelect.value;
                 const formData = new FormData();
+                
+                // 添加選擇的加密算法到請求中
+                formData.append('algorithm', selectedAlgorithm);
+                
                 filesToUpload.forEach(file => {
                     formData.append('files', file);
                 });
+
+                console.log(`使用 ${selectedAlgorithm} 算法進行加密`);
 
                 fetch(`${backendUrl}/api/encrypt`, {
                     method: 'POST',
@@ -529,7 +580,7 @@
                 })
                 .then(response => {
                     if (!response.ok) throw new Error('Encryption failed');
-                    alert('Files encrypted successfully!');
+                    alert(`Files encrypted successfully using ${selectedAlgorithm}!`);
                     fileList.innerHTML = '';
                     uploadButton.style.display = 'none';
                     filesToUpload = [];
