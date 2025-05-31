@@ -8,15 +8,15 @@
         "build": "echo 'No build step needed for static site'"
     },
     "dependencies": {
-        "express": "^4.18.2",
-        "cors": "^2.8.5",
+        "@stablelib/chacha": "^1.0.1",
         "body-parser": "^1.20.2",
-        "speakeasy": "^2.0.0",
-        "qrcode": "^1.5.3",
-        "mongoose": "^8.7.0",
+        "cors": "^2.8.5",
+        "express": "^4.18.2",
         "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.7.0",
         "multer": "^1.4.5-lts.1",
-        "@stablelib/chacha": "^1.0.1"
+        "qrcode": "^1.5.3",
+        "speakeasy": "^2.0.0"
     },
     "homepage": "https://oasis-star-ce.github.io"
 }
