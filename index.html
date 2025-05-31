@@ -226,6 +226,40 @@
             font-size: 16px;
             color: #e0e0e0;
         }
+        .file-list-container {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #e0e0e0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        .file-item p {
+            margin: 0;
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .file-item button {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .file-item .delete-button {
+            background: linear-gradient(45deg, #ff5555, #cc0000);
+        }
+        .file-item .delete-button:hover {
+            box-shadow: 0 0 20px rgba(255, 85, 85, 0.8);
+        }
         .upload-button {
             margin-top: 60px;
             padding: 10px 20px;
@@ -373,7 +407,7 @@
                     <h2>Check My Files</h2>
                 </div>
                 <div id="checkFilesContent">
-                    <div id="fileListContainer">
+                    <div class="file-list-container" id="fileListContainer">
                         <!-- 檔案列表將在這裡顯示 -->
                     </div>
                 </div>
@@ -518,7 +552,7 @@
 
         function fetchFileList() {
             if (!isLoggedIn) {
-                alert('請先登入！');
+                alert('Please login first!');
                 showSection('login');
                 return;
             }
@@ -537,11 +571,29 @@
             .then(data => {
                 const fileListContainer = document.getElementById('fileListContainer');
                 fileListContainer.innerHTML = '';
-                data.files.forEach(file => {
+                if (data.files.length === 0) {
                     const p = document.createElement('p');
-                    p.textContent = file.name;
+                    p.textContent = 'No files found.';
                     fileListContainer.appendChild(p);
-                });
+                } else {
+                    data.files.forEach(file => {
+                        const div = document.createElement('div');
+                        div.className = 'file-item';
+                        const p = document.createElement('p');
+                        p.textContent = file.name;
+                        const downloadButton = document.createElement('button');
+                        downloadButton.textContent = 'Download';
+                        downloadButton.onclick = () => downloadFile(file.name);
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.className = 'delete-button';
+                        deleteButton.onclick = () => deleteFile(file.name);
+                        div.appendChild(p);
+                        div.appendChild(downloadButton);
+                        div.appendChild(deleteButton);
+                        fileListContainer.appendChild(div);
+                    });
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -549,8 +601,68 @@
             });
         }
 
+        function downloadFile(filename) {
+            if (!isLoggedIn) {
+                alert('Please login first!');
+                showSection('login');
+                return;
+            }
+
+            fetch(`${backendUrl}/api/download/${encodeURIComponent(filename)}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to download file');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                alert(`File ${filename} downloaded successfully!`);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to download file. Please try again.');
+            });
+        }
+
+        function deleteFile(filename) {
+            if (!isLoggedIn) {
+                alert('Please login first!');
+                showSection('login');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete the file "${filename}"?`)) {
+                fetch(`${backendUrl}/api/delete/${encodeURIComponent(filename)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to delete file');
+                    alert(`File ${filename} deleted successfully!`);
+                    fetchFileList(); // 刷新檔案列表
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete file. Please try again.');
+                });
+            }
+        }
+
         function logout() {
-            if (confirm('確定要登出嗎？')) {
+            if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('username');
                 localStorage.removeItem('token');
@@ -559,7 +671,7 @@
                 updateHeader();
                 updateSections();
                 showSection('login');
-                alert('已成功登出！');
+                alert('Logged out successfully!');
             }
         }
 
@@ -606,7 +718,7 @@
 
         uploadButton.addEventListener('click', () => {
             if (!isLoggedIn) {
-                alert('請先登入！');
+                alert('Please login first!');
                 showSection('login');
                 return;
             }
@@ -664,7 +776,7 @@
 
         decryptButton.addEventListener('click', () => {
             if (!isLoggedIn) {
-                alert('請先登入！');
+                alert('Please login first!');
                 showSection('login');
                 return;
             }
