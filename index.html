@@ -319,6 +319,7 @@
                 <li><a onclick="showSection('home')">Home</a></li>
                 <li><a onclick="showSection('encrypt')">Encrypt</a></li>
                 <li><a onclick="showSection('decrypt')">Decrypt</a></li>
+                <li><a onclick="showSection('check-files')">Check My Files</a></li>
                 <li><a onclick="showSection('about')">About</a></li>
             </ul>
         </nav>
@@ -364,6 +365,19 @@
                     <button class="upload-button" id="decryptButton" style="display: none;">Decrypt</button>
                 </div>
                 <div class="login-prompt" id="decryptLoginPrompt" style="display: none;">
+                    請先登入！
+                </div>
+            </div>
+            <div id="check-files" class="content-section">
+                <div class="text-left-top">
+                    <h2>Check My Files</h2>
+                </div>
+                <div id="checkFilesContent">
+                    <div id="fileListContainer">
+                        <!-- 檔案列表將在這裡顯示 -->
+                    </div>
+                </div>
+                <div class="login-prompt" id="checkFilesLoginPrompt" style="display: none;">
                     請先登入！
                 </div>
             </div>
@@ -438,18 +452,14 @@
     </div>
     <script>
         const backendUrl = 'https://oasis-star-ce.onrender.com';
-
-        // 檢查登入狀態
         let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
         let currentUser = localStorage.getItem('username') || '';
 
-        // 初始化頁面
         function initializePage() {
             updateHeader();
             updateSections();
         }
 
-        // 更新右上角顯示
         function updateHeader() {
             const authButtons = document.getElementById('authButtons');
             const userInfo = document.getElementById('userInfo');
@@ -465,27 +475,31 @@
             }
         }
 
-        // 控制 Encrypt 和 Decrypt 區塊的顯示
         function updateSections() {
             const encryptContent = document.getElementById('encryptContent');
             const encryptLoginPrompt = document.getElementById('encryptLoginPrompt');
             const decryptContent = document.getElementById('decryptContent');
             const decryptLoginPrompt = document.getElementById('decryptLoginPrompt');
+            const checkFilesContent = document.getElementById('checkFilesContent');
+            const checkFilesLoginPrompt = document.getElementById('checkFilesLoginPrompt');
 
             if (isLoggedIn) {
                 encryptContent.style.display = 'block';
                 encryptLoginPrompt.style.display = 'none';
                 decryptContent.style.display = 'block';
                 decryptLoginPrompt.style.display = 'none';
+                checkFilesContent.style.display = 'block';
+                checkFilesLoginPrompt.style.display = 'none';
             } else {
                 encryptContent.style.display = 'none';
                 encryptLoginPrompt.style.display = 'block';
                 decryptContent.style.display = 'none';
                 decryptLoginPrompt.style.display = 'block';
+                checkFilesContent.style.display = 'none';
+                checkFilesLoginPrompt.style.display = 'block';
             }
         }
 
-        // 切換頁面
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.content-section');
             sections.forEach(section => {
@@ -494,16 +508,52 @@
             const section = document.getElementById(sectionId);
             if (section) {
                 section.classList.add('active');
+                if (sectionId === 'check-files' && isLoggedIn) {
+                    fetchFileList();
+                }
             } else {
                 console.error(`Section with ID '${sectionId}' not found.`);
             }
         }
 
-        // 登出功能
+        function fetchFileList() {
+            if (!isLoggedIn) {
+                alert('請先登入！');
+                showSection('login');
+                return;
+            }
+
+            fetch(`${backendUrl}/api/files`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch file list');
+                return response.json();
+            })
+            .then(data => {
+                const fileListContainer = document.getElementById('fileListContainer');
+                fileListContainer.innerHTML = '';
+                data.files.forEach(file => {
+                    const p = document.createElement('p');
+                    p.textContent = file.name;
+                    fileListContainer.appendChild(p);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to fetch file list. Please try again.');
+            });
+        }
+
         function logout() {
             if (confirm('確定要登出嗎？')) {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('username');
+                localStorage.removeItem('token');
                 isLoggedIn = false;
                 currentUser = '';
                 updateHeader();
@@ -564,19 +614,17 @@
             if (confirm('Are you sure you want to encrypt these files?')) {
                 const selectedAlgorithm = algorithmSelect.value;
                 const formData = new FormData();
-                
-                // 添加選擇的加密算法到請求中
                 formData.append('algorithm', selectedAlgorithm);
-                
                 filesToUpload.forEach(file => {
                     formData.append('files', file);
                 });
 
-                console.log(`使用 ${selectedAlgorithm} 算法進行加密`);
-
                 fetch(`${backendUrl}/api/encrypt`, {
                     method: 'POST',
                     body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    },
                 })
                 .then(response => {
                     if (!response.ok) throw new Error('Encryption failed');
@@ -630,6 +678,9 @@
                 fetch(`${backendUrl}/api/decrypt`, {
                     method: 'POST',
                     body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    },
                 })
                 .then(response => {
                     if (!response.ok) throw new Error('Decryption failed');
@@ -668,7 +719,7 @@
                     throw new Error(data.message || 'Login failed');
                 }
 
-                // 登入成功，儲存狀態
+                localStorage.setItem('token', data.token);
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('username', username);
                 isLoggedIn = true;
